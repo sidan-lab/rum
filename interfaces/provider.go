@@ -2,6 +2,11 @@ package interfaces
 
 import "github.com/sidan-lab/rum/models"
 
+type IProvider interface {
+	IFetcher
+	ISubmitter
+}
+
 type IFetcher interface {
 	// FetchAccountInfo(address string) (models.AccountInfo, error)
 	// FetchAddressUTxOs(address string, asset *string) ([]models.UTxO, error)
@@ -21,4 +26,8 @@ type IFetcher interface {
 	FetchTxInfo(hash string) (models.TransactionInfo, error)
 	// FetchUTxOs(hash string, index *int) ([]models.UTxO, error)
 	// Get(url string) (interface{}, error)
+}
+
+type ISubmitter interface {
+	SubmitTx(txCbor string) (string, error)
 }
