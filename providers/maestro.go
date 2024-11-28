@@ -7,23 +7,23 @@ import (
 	"github.com/sidan-lab/rum/models"
 )
 
-type MaestroService struct {
+type MaestroProvider struct {
 	maestroClient *client.Client
 }
 
-func NewMaestroService(apiKey string, network models.Network) *MaestroService {
+func NewMaestroProvider(apiKey string, network models.Network) *MaestroProvider {
 	maestroClient := client.NewClient(apiKey, string(network))
-	return &MaestroService{
+	return &MaestroProvider{
 		maestroClient: maestroClient,
 	}
 }
 
-func (ms *MaestroService) SubmitTx(txCbor string) (string, error) {
+func (ms *MaestroProvider) SubmitTx(txCbor string) (string, error) {
 	txHash, err := ms.maestroClient.TxManagerSubmit(txCbor)
 	return txHash, err
 }
 
-func (ms *MaestroService) FetchTxInfo(hash string) (models.TransactionInfo, error) {
+func (ms *MaestroProvider) FetchTxInfo(hash string) (models.TransactionInfo, error) {
 	tx, err := ms.maestroClient.TransactionDetails(hash)
 	if err != nil {
 		return models.TransactionInfo{}, err
