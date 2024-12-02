@@ -68,6 +68,9 @@ func (mv *Value) IsEmpty() bool {
 
 func (mv *Value) Merge(values ...*Value) {
 	for _, other := range values {
+		if other == nil {
+			continue
+		}
 		for unit, quantity := range other.Value {
 			if existingQuantity, exists := mv.Value[unit]; exists {
 				mv.Value[unit] = existingQuantity + quantity
