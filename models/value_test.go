@@ -80,6 +80,18 @@ func TestMergeNil(t *testing.T) {
 	}
 }
 
+func TestMergeFromNewMap(t *testing.T) {
+	mv1 := NewValue()
+	mv1.AddAsset(Asset{Unit: "USD", Quantity: "100"})
+
+	mv2 := NewValue()
+	mv2.Merge(mv1)
+
+	if mv1.Get("USD") != 100 {
+		t.Errorf("Expected 100, got %d", mv1.Get("USD"))
+	}
+}
+
 func TestToAssets(t *testing.T) {
 	mv := NewValue()
 	mv.AddAsset(Asset{Unit: "USD", Quantity: "100"})
