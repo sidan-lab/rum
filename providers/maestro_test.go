@@ -41,3 +41,19 @@ func TestMaestroFetchTxInfo(t *testing.T) {
 	}
 	fmt.Println("success!")
 }
+
+func TestMaestroFetchUtxos(t *testing.T) {
+	Init(t)
+	txHash := "4d2545880f6a6518e6b273875882089c9f3f9955cb3623e9222047e98fc7d1fe"
+	network := os.Getenv("NETWORK")
+	maestro := providers.NewMaestroProvider(os.Getenv("MAESTRO_API_KEY"), models.Network(network))
+	utxos, err := maestro.FetchUTxOs(txHash, nil)
+	if err != nil {
+		fmt.Println("failed to fetch utxos")
+	}
+	fmt.Println("success!")
+	for _, utxo := range utxos {
+		fmt.Printf("utxo: %v\n\n", utxo)
+		fmt.Printf("datum: %v\n\n", utxo.Output.PlutusData)
+	}
+}

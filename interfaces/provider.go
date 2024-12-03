@@ -24,7 +24,7 @@ type IFetcher interface {
 	// FetchHandleAddress(handle string) (string, error)
 	// FetchProtocolParameters(epoch int) (models.Protocol, error)
 	FetchTxInfo(hash string) (models.TransactionInfo, error)
-	// FetchUTxOs(hash string, index *int) ([]models.UTxO, error)
+	FetchUTxOs(hash string, index *int) ([]models.UTxO, error)
 	// Get(url string) (interface{}, error)
 }
 

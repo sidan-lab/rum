@@ -28,3 +28,18 @@ func TestBlockfrostFetchTxInfo(t *testing.T) {
 	}
 	fmt.Printf("success! %v", res)
 }
+
+func TestBlockfrostFetchUtxos(t *testing.T) {
+	Init(t)
+	txHash := "4d2545880f6a6518e6b273875882089c9f3f9955cb3623e9222047e98fc7d1fe"
+	blockfrost := providers.NewBlockfrostProvider(os.Getenv("BLOCKFROST_PROJECT_ID"))
+	utxos, err := blockfrost.FetchUTxOs(txHash, nil)
+	if err != nil {
+		fmt.Println("failed to fetch utxos")
+	}
+	fmt.Println("success!")
+	for _, utxo := range utxos {
+		fmt.Printf("utxo: %v\n\n", utxo)
+		fmt.Printf("datum: %v\n\n", utxo.Output.PlutusData)
+	}
+}
