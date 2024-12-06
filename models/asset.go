@@ -9,6 +9,19 @@ type Asset struct {
 
 type Assets []Asset
 
+func (a *Assets) GetLovelace() uint64 {
+	if a == nil {
+		return 0
+	}
+	for _, asset := range *a {
+		if asset.Unit == "lovelace" {
+			quantity, _ := strconv.ParseUint(asset.Quantity, 10, 64)
+			return quantity
+		}
+	}
+	return 0
+}
+
 func (a *Assets) PopAssetByUnit(unit string) Asset {
 	var filteredAssets Assets
 	filteredAssets = []Asset{}
