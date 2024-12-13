@@ -81,7 +81,7 @@ func (mv *Value) Merge(values ...*Value) {
 	}
 }
 
-func (mv *Value) ToAssets() []Asset {
+func (mv *Value) ToAssets() *[]Asset {
 	assets := make([]Asset, 0, len(mv.Value))
 	for unit, quantity := range mv.Value {
 		assets = append(assets, Asset{
@@ -89,7 +89,7 @@ func (mv *Value) ToAssets() []Asset {
 			Quantity: strconv.FormatInt(quantity, 10),
 		})
 	}
-	return assets
+	return &assets
 }
 
 func FromAssets(assets []Asset) *Value {

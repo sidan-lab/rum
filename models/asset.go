@@ -22,24 +22,23 @@ func (a *Assets) GetLovelace() uint64 {
 	return 0
 }
 
-func (a *Assets) PopAssetByUnit(unit string) Asset {
-	var filteredAssets Assets
-	filteredAssets = []Asset{}
+func (a *Assets) PopAssetByUnit(unit string) *Asset {
+	var popAsset Asset
+	var filteredAssets Assets = []Asset{}
 	found := false
-	var filteredAsset Asset
 	for _, asset := range *a {
 		if asset.Unit == unit && !found {
-			filteredAsset = asset
+			popAsset = asset
 			found = true
 		} else {
 			filteredAssets = append(filteredAssets, asset)
 		}
 	}
-	a = &filteredAssets
-	return filteredAsset
+	*a = filteredAssets
+	return &popAsset
 }
 
-func (a *Assets) MergeAssets(assets []Asset) []Asset {
+func (a *Assets) MergeAssets(assets []Asset) *[]Asset {
 	mergedAssets := make(map[string]Asset)
 	for _, asset := range assets {
 		if existingAsset, ok := mergedAssets[asset.Unit]; ok {
@@ -53,7 +52,7 @@ func (a *Assets) MergeAssets(assets []Asset) []Asset {
 	for _, asset := range mergedAssets {
 		result = append(result, asset)
 	}
-	return result
+	return &result
 }
 
 func AddQuantities(quantity1 string, quantity2 string) string {

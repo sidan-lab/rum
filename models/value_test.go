@@ -95,7 +95,7 @@ func TestMergeFromNewMap(t *testing.T) {
 func TestToAssets(t *testing.T) {
 	mv := NewValue()
 	mv.AddAsset(Asset{Unit: "USD", Quantity: "100"})
-	assets := mv.ToAssets()
+	assets := *mv.ToAssets()
 
 	if len(assets) != 1 {
 		t.Errorf("Expected 1 asset, got %d", len(assets))
