@@ -92,6 +92,15 @@ func (mv *Value) ToAssets() *[]Asset {
 	return &assets
 }
 
+func (mv *Value) Geq(other *Value) bool {
+	for unit, quantity := range other.Value {
+		if existingQuantity, exists := mv.Value[unit]; !exists || existingQuantity < quantity {
+			return false
+		}
+	}
+	return true
+}
+
 func FromAssets(assets []Asset) *Value {
 	mv := NewValue()
 	mv.AddAssets(assets)

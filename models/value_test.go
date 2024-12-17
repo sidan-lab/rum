@@ -119,3 +119,119 @@ func TestFromAssets(t *testing.T) {
 		t.Errorf("Expected 200, got %d", mv.Get("EUR"))
 	}
 }
+
+func TestGeq(t *testing.T) {
+	// Define test cases
+	tests := []struct {
+		name     string
+		value1   *Value
+		value2   *Value
+		expected bool
+	}{
+		{
+			name: "Value1 greater than or equal to Value2",
+			value1: &Value{
+				Value: map[string]int64{
+					"asset1": 1000,
+					"asset2": 2000,
+				},
+			},
+			value2: &Value{
+				Value: map[string]int64{
+					"asset1": 500,
+					"asset2": 1500,
+				},
+			},
+			expected: true,
+		},
+		{
+			name: "Value1 less than Value2",
+			value1: &Value{
+				Value: map[string]int64{
+					"asset1": 1000,
+					"asset2": 1000,
+				},
+			},
+			value2: &Value{
+				Value: map[string]int64{
+					"asset1": 1500,
+					"asset2": 1500,
+				},
+			},
+			expected: false,
+		},
+		{
+			name: "Value1 equal to Value2",
+			value1: &Value{
+				Value: map[string]int64{
+					"asset1": 1000,
+					"asset2": 2000,
+				},
+			},
+			value2: &Value{
+				Value: map[string]int64{
+					"asset1": 1000,
+					"asset2": 2000,
+				},
+			},
+			expected: true,
+		},
+		{
+			name: "Value1 has more assets than Value2",
+			value1: &Value{
+				Value: map[string]int64{
+					"asset1": 1000,
+					"asset2": 2000,
+					"asset3": 3000,
+				},
+			},
+			value2: &Value{
+				Value: map[string]int64{
+					"asset1": 1000,
+					"asset2": 2000,
+				},
+			},
+			expected: true,
+		},
+		{
+			name: "Value1 has fewer assets than Value2",
+			value1: &Value{
+				Value: map[string]int64{
+					"asset1": 1000,
+				},
+			},
+			value2: &Value{
+				Value: map[string]int64{
+					"asset1": 1000,
+					"asset2": 2000,
+				},
+			},
+			expected: false,
+		},
+		{
+			name: "Value1 has fewer assets than Value2",
+			value1: &Value{
+				Value: map[string]int64{
+					"asset1": 1500,
+					"asset2": 1500,
+				},
+			},
+			value2: &Value{
+				Value: map[string]int64{
+					"asset1": 1000,
+					"asset2": 2000,
+				},
+			},
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.value1.Geq(tt.value2)
+			if result != tt.expected {
+				t.Errorf("Geq() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
