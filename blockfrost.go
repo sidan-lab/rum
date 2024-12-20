@@ -1,4 +1,4 @@
-package providers
+package rum
 
 import (
 	"context"
@@ -6,8 +6,6 @@ import (
 	"strconv"
 
 	"github.com/blockfrost/blockfrost-go"
-	"github.com/sidan-lab/rum/models"
-	"github.com/sidan-lab/rum/utils"
 )
 
 var NetworkMap = map[string]string{
@@ -53,10 +51,10 @@ func (bf *BlockfrostProvider) SubmitTx(txCbor string) (string, error) {
 	return txHash, err
 }
 
-func (bf *BlockfrostProvider) FetchTxInfo(hash string) (models.TransactionInfo, error) {
+func (bf *BlockfrostProvider) FetchTxInfo(hash string) (TransactionInfo, error) {
 	bfTxInfo, err := bf.blockfrostClient.Transaction(context.TODO(), hash)
 	if err != nil {
-		return models.TransactionInfo{}, err
+		return TransactionInfo{}, err
 	}
 
 	invalidHereafter := ""
@@ -68,7 +66,7 @@ func (bf *BlockfrostProvider) FetchTxInfo(hash string) (models.TransactionInfo, 
 		invalidBefore = *bfTxInfo.InvalidBefore
 	}
 
-	txInfo := models.TransactionInfo{
+	txInfo := TransactionInfo{
 		Block:         bfTxInfo.Block,
 		Deposit:       bfTxInfo.Deposit,
 		Fees:          bfTxInfo.Fees,
@@ -82,7 +80,7 @@ func (bf *BlockfrostProvider) FetchTxInfo(hash string) (models.TransactionInfo, 
 	return txInfo, nil
 }
 
-func (bf *BlockfrostProvider) FetchUTxOs(hash string, index *int) ([]models.UTxO, error) {
+func (bf *BlockfrostProvider) FetchUTxOs(hash string, index *int) ([]UTxO, error) {
 	res, err := bf.blockfrostClient.TransactionUTXOs(context.TODO(), hash)
 	if err != nil {
 		return nil, err
@@ -90,24 +88,24 @@ func (bf *BlockfrostProvider) FetchUTxOs(hash string, index *int) ([]models.UTxO
 	bfOutputs := res.Outputs
 	utxos := BfToUtxos(bfOutputs, hash)
 	if index != nil {
-		utxo := utils.FindUtxoByIndex(utxos, *index)
+		utxo := FindUtxoByIndex(utxos, *index)
 		if utxo != nil {
-			return []models.UTxO{*utxo}, nil
+			return []UTxO{*utxo}, nil
 		}
-		return []models.UTxO{}, nil
+		return []UTxO{}, nil
 	}
 	return utxos, nil
 }
 
-func BfToUtxos(bfUtxos []blockfrost.TransactionOutput, hash string) []models.UTxO {
-	utxos := make([]models.UTxO, len(bfUtxos))
+func BfToUtxos(bfUtxos []blockfrost.TransactionOutput, hash string) []UTxO {
+	utxos := make([]UTxO, len(bfUtxos))
 	for i, bfUtxo := range bfUtxos {
 		utxos[i] = BfToUtxo(bfUtxo, hash)
 	}
 	return utxos
 }
 
-func BfToUtxo(bfUtxo blockfrost.TransactionOutput, hash string) models.UTxO {
+func BfToUtxo(bfUtxo blockfrost.TransactionOutput, hash string) UTxO {
 	dataHash := ""
 	if bfUtxo.DataHash != nil {
 		dataHash = *bfUtxo.DataHash
@@ -121,12 +119,12 @@ func BfToUtxo(bfUtxo blockfrost.TransactionOutput, hash string) models.UTxO {
 		referenceScriptHash = *bfUtxo.ReferenceScriptHash
 	}
 
-	return models.UTxO{
-		Input: models.Input{
+	return UTxO{
+		Input: Input{
 			TxHash:      hash,
 			OutputIndex: int(bfUtxo.OutputIndex),
 		},
-		Output: models.Output{
+		Output: Output{
 			Amount:     BfToAssets(bfUtxo.Amount),
 			Address:    bfUtxo.Address,
 			DataHash:   dataHash,
@@ -137,16 +135,16 @@ func BfToUtxo(bfUtxo blockfrost.TransactionOutput, hash string) models.UTxO {
 	}
 }
 
-func BfToAssets(bfAssets []blockfrost.TxAmount) []models.Asset {
-	assets := make([]models.Asset, len(bfAssets))
+func BfToAssets(bfAssets []blockfrost.TxAmount) []Asset {
+	assets := make([]Asset, len(bfAssets))
 	for i, bfAsset := range bfAssets {
 		assets[i] = BfToAsset(bfAsset)
 	}
 	return assets
 }
 
-func BfToAsset(bfAsset blockfrost.TxAmount) models.Asset {
-	return models.Asset{
+func BfToAsset(bfAsset blockfrost.TxAmount) Asset {
+	return Asset{
 		Quantity: bfAsset.Quantity,
 		Unit:     bfAsset.Unit,
 	}

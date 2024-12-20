@@ -1,4 +1,4 @@
-package providers
+package rum
 
 import (
 	"encoding/json"
@@ -6,15 +6,13 @@ import (
 
 	"github.com/maestro-org/go-sdk/client"
 	msModel "github.com/maestro-org/go-sdk/models"
-	"github.com/sidan-lab/rum/models"
-	"github.com/sidan-lab/rum/utils"
 )
 
 type MaestroProvider struct {
 	maestroClient *client.Client
 }
 
-func NewMaestroProvider(apiKey string, network models.Network) *MaestroProvider {
+func NewMaestroProvider(apiKey string, network Network) *MaestroProvider {
 	maestroClient := client.NewClient(apiKey, string(network))
 	return &MaestroProvider{
 		maestroClient: maestroClient,
@@ -26,13 +24,13 @@ func (ms *MaestroProvider) SubmitTx(txCbor string) (string, error) {
 	return txHash, err
 }
 
-func (ms *MaestroProvider) FetchTxInfo(hash string) (models.TransactionInfo, error) {
+func (ms *MaestroProvider) FetchTxInfo(hash string) (TransactionInfo, error) {
 	tx, err := ms.maestroClient.TransactionDetails(hash)
 	if err != nil {
-		return models.TransactionInfo{}, err
+		return TransactionInfo{}, err
 	}
 	msTxInfo := tx.Data
-	txInfo := models.TransactionInfo{
+	txInfo := TransactionInfo{
 		Index:         int(msTxInfo.BlockTxIndex),
 		Block:         msTxInfo.BlockHash,
 		Hash:          msTxInfo.TxHash,
@@ -52,7 +50,7 @@ type MsDatum struct {
 	Json  any    `json:"json"`
 }
 
-func (ms *MaestroProvider) FetchUTxOs(hash string, index *int) ([]models.UTxO, error) {
+func (ms *MaestroProvider) FetchUTxOs(hash string, index *int) ([]UTxO, error) {
 	res, err := ms.maestroClient.TransactionDetails(hash)
 	if err != nil {
 		return nil, err
@@ -60,24 +58,24 @@ func (ms *MaestroProvider) FetchUTxOs(hash string, index *int) ([]models.UTxO, e
 	msOutputs := res.Data.Outputs
 	utxos := MsToUtxos(msOutputs)
 	if index != nil {
-		utxo := utils.FindUtxoByIndex(utxos, *index)
+		utxo := FindUtxoByIndex(utxos, *index)
 		if utxo != nil {
-			return []models.UTxO{*utxo}, nil
+			return []UTxO{*utxo}, nil
 		}
-		return []models.UTxO{}, nil
+		return []UTxO{}, nil
 	}
 	return utxos, nil
 }
 
-func MsToUtxos(msUtxos []msModel.Utxo) []models.UTxO {
-	utxos := make([]models.UTxO, len(msUtxos))
+func MsToUtxos(msUtxos []msModel.Utxo) []UTxO {
+	utxos := make([]UTxO, len(msUtxos))
 	for i, msUtxo := range msUtxos {
 		utxos[i] = MsToUtxo(msUtxo)
 	}
 	return utxos
 }
 
-func MsToUtxo(msUtxo msModel.Utxo) models.UTxO {
+func MsToUtxo(msUtxo msModel.Utxo) UTxO {
 	var datum MsDatum
 	if msUtxo.Datum != nil {
 		datumBytes, err := json.Marshal(msUtxo.Datum)
@@ -86,12 +84,12 @@ func MsToUtxo(msUtxo msModel.Utxo) models.UTxO {
 			json.Unmarshal(datumBytes, &datum)
 		}
 	}
-	return models.UTxO{
-		Input: models.Input{
+	return UTxO{
+		Input: Input{
 			TxHash:      msUtxo.TxHash,
 			OutputIndex: int(msUtxo.Index),
 		},
-		Output: models.Output{
+		Output: Output{
 			Amount:     MsToAssets(msUtxo.Assets),
 			Address:    msUtxo.Address,
 			DataHash:   datum.Hash,
@@ -102,16 +100,16 @@ func MsToUtxo(msUtxo msModel.Utxo) models.UTxO {
 	}
 }
 
-func MsToAssets(msAssets []msModel.Asset) []models.Asset {
-	assets := make([]models.Asset, len(msAssets))
+func MsToAssets(msAssets []msModel.Asset) []Asset {
+	assets := make([]Asset, len(msAssets))
 	for i, msAsset := range msAssets {
 		assets[i] = MsToAsset(msAsset)
 	}
 	return assets
 }
 
-func MsToAsset(msAsset msModel.Asset) models.Asset {
-	return models.Asset{
+func MsToAsset(msAsset msModel.Asset) Asset {
+	return Asset{
 		Quantity: strconv.FormatInt(msAsset.Amount, 10),
 		Unit:     msAsset.Unit,
 	}

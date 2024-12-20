@@ -1,4 +1,4 @@
-package providers_test
+package rum_test
 
 import (
 	"fmt"
@@ -6,10 +6,7 @@ import (
 	"testing"
 
 	"github.com/lpernett/godotenv"
-
-	"github.com/sidan-lab/rum/interfaces"
-	"github.com/sidan-lab/rum/models"
-	"github.com/sidan-lab/rum/providers"
+	"github.com/sidan-lab/rum"
 )
 
 const confirmedTxHash = "5101ee2bac21b7e8d7409ee95aeec1444f294248ae85a98c88bbba640cbd132d"
@@ -23,10 +20,10 @@ func Init(t *testing.T) {
 }
 
 func TestMaestroProviderImplementsIFetcher(t *testing.T) {
-	var _ interfaces.IFetcher = (*providers.MaestroProvider)(nil)
+	var _ rum.IFetcher = (*rum.MaestroProvider)(nil)
 }
 func TestMaestroProviderImplementsISubmitter(t *testing.T) {
-	var _ interfaces.ISubmitter = (*providers.MaestroProvider)(nil)
+	var _ rum.ISubmitter = (*rum.MaestroProvider)(nil)
 }
 
 func TestMaestroFetchTxInfo(t *testing.T) {
@@ -34,7 +31,7 @@ func TestMaestroFetchTxInfo(t *testing.T) {
 	txHash := confirmedTxHash
 	txHash = unconfirmedTxHash
 	network := os.Getenv("NETWORK")
-	maestro := providers.NewMaestroProvider(os.Getenv("MAESTRO_API_KEY"), models.Network(network))
+	maestro := rum.NewMaestroProvider(os.Getenv("MAESTRO_API_KEY"), rum.Network(network))
 	_, err := maestro.FetchTxInfo(txHash)
 	if err != nil {
 		fmt.Println("failed to fetch tx")
@@ -46,7 +43,7 @@ func TestMaestroFetchUtxos(t *testing.T) {
 	Init(t)
 	txHash := "4d2545880f6a6518e6b273875882089c9f3f9955cb3623e9222047e98fc7d1fe"
 	network := os.Getenv("NETWORK")
-	maestro := providers.NewMaestroProvider(os.Getenv("MAESTRO_API_KEY"), models.Network(network))
+	maestro := rum.NewMaestroProvider(os.Getenv("MAESTRO_API_KEY"), rum.Network(network))
 	utxos, err := maestro.FetchUTxOs(txHash, nil)
 	if err != nil {
 		fmt.Println("failed to fetch utxos")

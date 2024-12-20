@@ -1,27 +1,25 @@
-package models
+package rum_test
 
 import (
 	"testing"
+
+	"github.com/sidan-lab/rum"
 )
 
 func TestAddAsset(t *testing.T) {
-	mv := NewValue()
-	asset := Asset{Unit: "USD", Quantity: "100"}
-	mv.AddAsset(asset)
-
+	asset := rum.Asset{Unit: "USD", Quantity: "100"}
+	mv := rum.NewValue().AddAsset(&asset)
 	if mv.Get("USD") != 100 {
 		t.Errorf("Expected 100, got %d", mv.Get("USD"))
 	}
 }
 
 func TestAddAssets(t *testing.T) {
-	mv := NewValue()
-	assets := []Asset{
+	assets := []rum.Asset{
 		{Unit: "USD", Quantity: "100"},
 		{Unit: "EUR", Quantity: "200"},
 	}
-	mv.AddAssets(assets)
-
+	mv := rum.NewValue().AddAssets(&assets)
 	if mv.Get("USD") != 100 {
 		t.Errorf("Expected 100, got %d", mv.Get("USD"))
 	}
@@ -31,10 +29,8 @@ func TestAddAssets(t *testing.T) {
 }
 
 func TestNegateAsset(t *testing.T) {
-	mv := NewValue()
-	asset := Asset{Unit: "USD", Quantity: "100"}
-	mv.AddAsset(asset)
-	mv.NegateAsset(asset)
+	asset := rum.Asset{Unit: "USD", Quantity: "100"}
+	mv := rum.NewValue().AddAsset(&asset).NegateAsset(&asset)
 
 	if mv.Get("USD") != 0 {
 		t.Errorf("Expected 0, got %d", mv.Get("USD"))
@@ -42,14 +38,11 @@ func TestNegateAsset(t *testing.T) {
 }
 
 func TestNegateAssets(t *testing.T) {
-	mv := NewValue()
-	assets := []Asset{
+	assets := []rum.Asset{
 		{Unit: "USD", Quantity: "100"},
 		{Unit: "EUR", Quantity: "200"},
 	}
-	mv.AddAssets(assets)
-	mv.NegateAssets(assets)
-
+	mv := rum.NewValue().AddAssets(&assets).NegateAssets(&assets)
 	if mv.Get("USD") != 0 {
 		t.Errorf("Expected 0, got %d", mv.Get("USD"))
 	}
@@ -59,20 +52,16 @@ func TestNegateAssets(t *testing.T) {
 }
 
 func TestMerge(t *testing.T) {
-	mv1 := NewValue()
-	mv2 := NewValue()
-	mv1.AddAsset(Asset{Unit: "USD", Quantity: "100"})
-	mv2.AddAsset(Asset{Unit: "USD", Quantity: "200"})
-	mv1.Merge(mv2)
-
-	if mv1.Get("USD") != 300 {
+	mv1 := rum.NewValue().AddAsset(&rum.Asset{Unit: "USD", Quantity: "100"})
+	mv2 := rum.NewValue().AddAsset(&rum.Asset{Unit: "USD", Quantity: "200"}).Merge(mv1)
+	if mv2.Get("USD") != 300 {
 		t.Errorf("Expected 300, got %d", mv1.Get("USD"))
 	}
 }
 
 func TestMergeNil(t *testing.T) {
-	mv1 := NewValue()
-	mv1.AddAsset(Asset{Unit: "USD", Quantity: "100"})
+	mv1 := rum.NewValue()
+	mv1.AddAsset(&rum.Asset{Unit: "USD", Quantity: "100"})
 	mv1.Merge(nil)
 
 	if mv1.Get("USD") != 100 {
@@ -81,10 +70,10 @@ func TestMergeNil(t *testing.T) {
 }
 
 func TestMergeFromNewMap(t *testing.T) {
-	mv1 := NewValue()
-	mv1.AddAsset(Asset{Unit: "USD", Quantity: "100"})
+	mv1 := rum.NewValue()
+	mv1.AddAsset(&rum.Asset{Unit: "USD", Quantity: "100"})
 
-	mv2 := NewValue()
+	mv2 := rum.NewValue()
 	mv2.Merge(mv1)
 
 	if mv1.Get("USD") != 100 {
@@ -93,8 +82,8 @@ func TestMergeFromNewMap(t *testing.T) {
 }
 
 func TestToAssets(t *testing.T) {
-	mv := NewValue()
-	mv.AddAsset(Asset{Unit: "USD", Quantity: "100"})
+	mv := rum.NewValue()
+	mv.AddAsset(&rum.Asset{Unit: "USD", Quantity: "100"})
 	assets := *mv.ToAssets()
 
 	if len(assets) != 1 {
@@ -106,11 +95,11 @@ func TestToAssets(t *testing.T) {
 }
 
 func TestFromAssets(t *testing.T) {
-	assets := []Asset{
+	assets := []rum.Asset{
 		{Unit: "USD", Quantity: "100"},
 		{Unit: "EUR", Quantity: "200"},
 	}
-	mv := FromAssets(assets)
+	mv := rum.NewValueFromAssets(&assets)
 
 	if mv.Get("USD") != 100 {
 		t.Errorf("Expected 100, got %d", mv.Get("USD"))
@@ -124,19 +113,19 @@ func TestGeq(t *testing.T) {
 	// Define test cases
 	tests := []struct {
 		name     string
-		value1   *Value
-		value2   *Value
+		value1   *rum.Value
+		value2   *rum.Value
 		expected bool
 	}{
 		{
 			name: "Value1 greater than or equal to Value2",
-			value1: &Value{
+			value1: &rum.Value{
 				Value: map[string]int64{
 					"asset1": 1000,
 					"asset2": 2000,
 				},
 			},
-			value2: &Value{
+			value2: &rum.Value{
 				Value: map[string]int64{
 					"asset1": 500,
 					"asset2": 1500,
@@ -146,13 +135,13 @@ func TestGeq(t *testing.T) {
 		},
 		{
 			name: "Value1 less than Value2",
-			value1: &Value{
+			value1: &rum.Value{
 				Value: map[string]int64{
 					"asset1": 1000,
 					"asset2": 1000,
 				},
 			},
-			value2: &Value{
+			value2: &rum.Value{
 				Value: map[string]int64{
 					"asset1": 1500,
 					"asset2": 1500,
@@ -162,13 +151,13 @@ func TestGeq(t *testing.T) {
 		},
 		{
 			name: "Value1 equal to Value2",
-			value1: &Value{
+			value1: &rum.Value{
 				Value: map[string]int64{
 					"asset1": 1000,
 					"asset2": 2000,
 				},
 			},
-			value2: &Value{
+			value2: &rum.Value{
 				Value: map[string]int64{
 					"asset1": 1000,
 					"asset2": 2000,
@@ -178,14 +167,14 @@ func TestGeq(t *testing.T) {
 		},
 		{
 			name: "Value1 has more assets than Value2",
-			value1: &Value{
+			value1: &rum.Value{
 				Value: map[string]int64{
 					"asset1": 1000,
 					"asset2": 2000,
 					"asset3": 3000,
 				},
 			},
-			value2: &Value{
+			value2: &rum.Value{
 				Value: map[string]int64{
 					"asset1": 1000,
 					"asset2": 2000,
@@ -195,12 +184,12 @@ func TestGeq(t *testing.T) {
 		},
 		{
 			name: "Value1 has fewer assets than Value2",
-			value1: &Value{
+			value1: &rum.Value{
 				Value: map[string]int64{
 					"asset1": 1000,
 				},
 			},
-			value2: &Value{
+			value2: &rum.Value{
 				Value: map[string]int64{
 					"asset1": 1000,
 					"asset2": 2000,
@@ -210,13 +199,13 @@ func TestGeq(t *testing.T) {
 		},
 		{
 			name: "Value1 has fewer assets than Value2",
-			value1: &Value{
+			value1: &rum.Value{
 				Value: map[string]int64{
 					"asset1": 1500,
 					"asset2": 1500,
 				},
 			},
-			value2: &Value{
+			value2: &rum.Value{
 				Value: map[string]int64{
 					"asset1": 1000,
 					"asset2": 2000,
