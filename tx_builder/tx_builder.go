@@ -35,7 +35,7 @@ type TxBuilderParam struct {
 	Params *models.Protocol
 }
 
-func NewTxBuilder(param TxBuilderParam) *TxBuilder {
+func New(param TxBuilderParam) *TxBuilder {
 	return &TxBuilder{
 		// serializer: WhiskyCSL::new(param.params.clone()).unwrap(),
 		TxBuilderBody:          types.NewTxBuilderBody(),
@@ -62,3 +62,79 @@ func NewTxBuilder(param TxBuilderParam) *TxBuilder {
 		InputsForEvaluation: map[string]types.UTxO{},
 	}
 }
+
+func NewCore() *TxBuilder {
+	return New(TxBuilderParam{
+		Params: nil,
+	})
+}
+
+func (builder *TxBuilder) RequiredSignerHash(pubKeyHash string) *TxBuilder {
+	builder.TxBuilderBody.RequiredSignatures = append(builder.TxBuilderBody.RequiredSignatures, pubKeyHash)
+	return builder
+}
+
+func (builder *TxBuilder) ChangeAddress(address string) *TxBuilder {
+	builder.TxBuilderBody.ChangeAddress = address
+	return builder
+}
+
+// pub fn change_output_datum(&mut self, data: WData) -> &mut Self {
+
+func (builder *TxBuilder) InvalidBefore(slot uint64) *TxBuilder {
+	builder.TxBuilderBody.ValidityRange.InvalidBefore = &slot
+	return builder
+}
+
+func (builder *TxBuilder) InvalidHereafter(slot uint64) *TxBuilder {
+	builder.TxBuilderBody.ValidityRange.InvalidHereafter = &slot
+	return builder
+}
+
+func (builder *TxBuilder) MetadataValue(tag string, metadata string) *TxBuilder {
+	builder.TxBuilderBody.Metadata = append(builder.TxBuilderBody.Metadata, types.Metadata{
+		Tag:      tag,
+		Metadata: metadata,
+	})
+	return builder
+}
+
+func (builder *TxBuilder) SigningKey(skeyHex string) *TxBuilder {
+	builder.TxBuilderBody.SigningKey = append(builder.TxBuilderBody.SigningKey, skeyHex)
+	return builder
+}
+
+func (builder *TxBuilder) ChainTx(txHex string) *TxBuilder {
+	builder.ChainedTxs = append(builder.ChainedTxs, txHex)
+	return builder
+}
+
+// pub fn input_for_evaluation(&mut self, input: &UTxO) -> &mut Self {
+
+func (builder *TxBuilder) SelectUtxosFrom(extraInputs []types.UTxO, threshold uint64) *TxBuilder {
+	builder.SelectionThreshold = threshold
+	builder.ExtraInputs = append(builder.ExtraInputs, extraInputs...)
+	return builder
+}
+
+func (builder *TxBuilder) SetFee(fee string) *TxBuilder {
+	builder.TxBuilderBody.Fee = &fee
+	return builder
+}
+
+func (builder *TxBuilder) Network(network types.Network) *TxBuilder {
+	builder.TxBuilderBody.Network = &network
+	return builder
+}
+
+// pub fn queue_input(&mut self) {
+//
+// pub fn queue_withdrawal(&mut self) {
+//
+// pub fn queue_vote(&mut self) {
+//
+// pub fn queue_mint(&mut self) {
+//
+// pub fn queue_all_last_item(&mut self) {
+//
+// pub fn add_utxos_from(
