@@ -119,7 +119,7 @@ func (r RegisterStake) MarshalJSON() ([]byte, error) {
 
 type DelegateStake struct {
 	StakeKeyAddress string `json:"stakeKeyAddress"`
-	PoolId          string `json:"poolId"`
+	PoolID          string `json:"poolId"`
 }
 
 func (DelegateStake) isCertificateType() {}
@@ -141,7 +141,7 @@ func (d DeregisterStake) MarshalJSON() ([]byte, error) {
 }
 
 type RetirePool struct {
-	PoolId string `json:"poolId"`
+	PoolID string `json:"poolId"`
 	Epoch  uint32 `json:"epoch"`
 }
 
@@ -260,7 +260,7 @@ func (c CommitteeColdResign) MarshalJSON() ([]byte, error) {
 }
 
 type DRepRegistration struct {
-	DrepId string  `json:"drepId"`
+	DrepID string  `json:"drepId"`
 	Coin   uint64  `json:"coin"`
 	Anchor *Anchor `json:"anchor"`
 }
@@ -273,7 +273,7 @@ func (d DRepRegistration) MarshalJSON() ([]byte, error) {
 }
 
 type DRepDeregistration struct {
-	DrepId string `json:"drepId"`
+	DrepID string `json:"drepId"`
 	Coin   uint64 `json:"coin"`
 }
 
@@ -285,7 +285,7 @@ func (d DRepDeregistration) MarshalJSON() ([]byte, error) {
 }
 
 type DRepUpdate struct {
-	DrepId string  `json:"drepId"`
+	DrepID string  `json:"drepId"`
 	Anchor *Anchor `json:"anchor"`
 }
 
