@@ -1,4 +1,5 @@
-package txbuilder
+// Package builder
+package builder
 
 import (
 	"github.com/sidan-lab/rum/models"
