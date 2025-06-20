@@ -27,7 +27,6 @@ func (builder *TxBuilder) DelegateStakeCertificate(
 	stakeKeyAddress string,
 	poolID string,
 ) *TxBuilder {
-
 	builder.TxBuilderBody.Certificates = append(builder.TxBuilderBody.Certificates, types.BasicCertificate{
 		Inner: types.DelegateStake{
 			StakeKeyAddress: stakeKeyAddress,
@@ -60,7 +59,6 @@ func (builder *TxBuilder) VoteDelegationCertificate(
 	stakeKeyAddress string,
 	drep types.DRep,
 ) *TxBuilder {
-
 	builder.TxBuilderBody.Certificates = append(builder.TxBuilderBody.Certificates, types.BasicCertificate{
 		Inner: types.VoteDelegation{
 			StakeKeyAddress: stakeKeyAddress,
@@ -90,7 +88,6 @@ func (builder *TxBuilder) StakeRegistrationAndDelegation(
 	poolKeyHash string,
 	coin uint64,
 ) *TxBuilder {
-
 	builder.TxBuilderBody.Certificates = append(builder.TxBuilderBody.Certificates, types.BasicCertificate{
 		Inner: types.StakeRegistrationAndDelegation{
 			StakeKeyAddress: stakeKeyAddress,
@@ -137,7 +134,6 @@ func (builder *TxBuilder) CommitteeHotAuth(
 	committeeColdKeyAddress string,
 	committeeHotKeyAddress string,
 ) *TxBuilder {
-
 	builder.TxBuilderBody.Certificates = append(builder.TxBuilderBody.Certificates, types.BasicCertificate{
 		Inner: types.CommitteeHotAuth{
 			CommitteeColdKeyAddress: committeeColdKeyAddress,
@@ -166,7 +162,6 @@ func (builder *TxBuilder) DRepRegistration(
 	coin uint64,
 	anchor *types.Anchor,
 ) *TxBuilder {
-
 	builder.TxBuilderBody.Certificates = append(builder.TxBuilderBody.Certificates, types.BasicCertificate{
 		Inner: types.DRepRegistration{
 			DrepID: drepID,
@@ -181,7 +176,6 @@ func (builder *TxBuilder) DRepDeregistration(
 	drepID string,
 	coin uint64,
 ) *TxBuilder {
-
 	builder.TxBuilderBody.Certificates = append(builder.TxBuilderBody.Certificates, types.BasicCertificate{
 		Inner: types.DRepDeregistration{
 			DrepID: drepID,
@@ -195,7 +189,6 @@ func (builder *TxBuilder) DRepUpdate(
 	drepID string,
 	anchor *types.Anchor,
 ) *TxBuilder {
-
 	builder.TxBuilderBody.Certificates = append(builder.TxBuilderBody.Certificates, types.BasicCertificate{
 		Inner: types.DRepUpdate{
 			DrepID: drepID,

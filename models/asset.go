@@ -1,3 +1,4 @@
+// Package models
 package models
 
 type Asset struct {

@@ -64,25 +64,23 @@ func (builder *TxBuilder) MintingScript(scriptCbor string) *TxBuilder {
 	if builder.MintItem == nil {
 		panic("Undefined mint")
 	}
-	if builder.AddingPlutusMint == nil {
-		panic("Plutus mints must have version specified")
-	}
 
 	switch mintItem := builder.MintItem.(type) {
 	case types.ScriptMint:
-		scriptMint := mintItem
-		scriptMint.ScriptSource = types.ProvidedScriptSource{
+		if builder.AddingPlutusMint == nil {
+			panic("Plutus mints must have version specified")
+		}
+		mintItem.ScriptSource = types.ProvidedScriptSource{
 			ScriptCbor:      scriptCbor,
 			LanguageVersion: *builder.AddingPlutusMint,
 		}
 		builder.AddingPlutusMint = nil
-		builder.MintItem = scriptMint
+		builder.MintItem = mintItem
 	case types.SimpleScriptMint:
-		simpleScriptMint := mintItem
-		simpleScriptMint.ScriptSource = types.ProvidedSimpleScriptSource{
+		mintItem.ScriptSource = types.ProvidedSimpleScriptSource{
 			ScriptCbor: scriptCbor,
 		}
-		builder.MintItem = simpleScriptMint
+		builder.MintItem = mintItem
 	}
 	return builder
 }
@@ -91,15 +89,13 @@ func (builder *TxBuilder) MintTxInReference(txHash string, txIndex uint32, scrip
 	if builder.MintItem == nil {
 		panic("Undefined mint")
 	}
-	if builder.AddingPlutusMint == nil {
-		panic("Plutus mints must have version specified")
-	}
 
-	mintItem := builder.MintItem
-	switch builder.MintItem.(type) {
+	switch mintItem := builder.MintItem.(type) {
 	case types.ScriptMint:
-		scriptMint := mintItem.(types.ScriptMint)
-		scriptMint.ScriptSource = types.InlineScriptSource{
+		if builder.AddingPlutusMint == nil {
+			panic("Plutus mints must have version specified")
+		}
+		mintItem.ScriptSource = types.InlineScriptSource{
 			RefTxIn: types.RefTxIn{
 				TxHash:  txHash,
 				TxIndex: txIndex,
@@ -110,10 +106,9 @@ func (builder *TxBuilder) MintTxInReference(txHash string, txIndex uint32, scrip
 			LanguageVersion: *builder.AddingPlutusMint,
 			ScriptSize:      scriptSize,
 		}
-		builder.MintItem = scriptMint
+		builder.MintItem = mintItem
 	case types.SimpleScriptMint:
-		simpleScriptMint := mintItem.(types.SimpleScriptMint)
-		simpleScriptMint.ScriptSource = types.InlineSimpleScriptSource{
+		mintItem.ScriptSource = types.InlineSimpleScriptSource{
 			RefTxIn: types.RefTxIn{
 				TxHash:  txHash,
 				TxIndex: txIndex,
@@ -123,7 +118,7 @@ func (builder *TxBuilder) MintTxInReference(txHash string, txIndex uint32, scrip
 			SimpleScriptHash: scriptHash,
 			ScriptSize:       scriptSize,
 		}
-		builder.MintItem = simpleScriptMint
+		builder.MintItem = mintItem
 	}
 	return builder
 }
@@ -140,12 +135,11 @@ func (builder *TxBuilder) MintRedeemerValue(redeemer WRedeemer) *TxBuilder {
 
 	switch mintItem := builder.MintItem.(type) {
 	case types.ScriptMint:
-		scriptMint := mintItem
-		scriptMint.Redeemer = &types.Redeemer{
+		mintItem.Redeemer = &types.Redeemer{
 			Data:    rawRedeemer,
 			ExUnits: redeemer.ExUnits,
 		}
-		builder.MintItem = scriptMint
+		builder.MintItem = mintItem
 	case types.SimpleScriptMint:
 		panic("Redeemer values cannot be defined for native script mints")
 	}
