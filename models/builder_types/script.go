@@ -33,19 +33,19 @@ type SimpleScriptSource interface {
 }
 
 type ProvidedSimpleScriptSource struct {
-    ScriptCbor string `json:"scriptCbor"`
+	ScriptCbor string `json:"scriptCbor"`
 }
 
 func (ProvidedSimpleScriptSource) isSimpleScriptSource() {}
 
 type InlineSimpleScriptSource struct {
-    RefTxIn RefTxIn `json:"refTxIn"`
-    SimpleScriptHash string `json:"simpleScriptHash"`
-    ScriptSize uint `json:"scriptSize"`
+	RefTxIn          RefTxIn `json:"refTxIn"`
+	SimpleScriptHash string  `json:"simpleScriptHash"`
+	ScriptSize       uint    `json:"scriptSize"`
 }
 
 func (InlineSimpleScriptSource) isSimpleScriptSource() {}
-
+func (InlineSimpleScriptSource) isVote()               {}
 
 type ScriptSource interface {
 	isScriptSource()
