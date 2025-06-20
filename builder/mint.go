@@ -34,7 +34,7 @@ func (builder *TxBuilder) MintPlutusScriptV3() *TxBuilder {
 
 func (builder *TxBuilder) Mint(quantity int64, policy string, name string) *TxBuilder {
 	if builder.MintItem != nil {
-		// TODO: queue mint
+		builder.QueueMint()
 	}
 
 	if builder.AddingPlutusMint != nil {

@@ -2,6 +2,8 @@
 package builder
 
 import (
+	"fmt"
+
 	"github.com/sidan-lab/rum/models"
 	types "github.com/sidan-lab/rum/models/builder_types"
 )
@@ -11,7 +13,7 @@ type TxBuilder struct {
 	TxBuilderBody          *types.TxBuilderBody
 	ProtocolParams         *models.Protocol
 	TxInItem               types.TxIn
-	WithdrawalItem         *types.Withdrawal
+	WithdrawalItem         types.Withdrawal
 	VoteItem               types.Vote
 	MintItem               types.MintItem
 	CollateralItem         *types.PubKeyTxIn
@@ -80,7 +82,16 @@ func (builder *TxBuilder) ChangeAddress(address string) *TxBuilder {
 	return builder
 }
 
-// pub fn change_output_datum(&mut self, data: WData) -> &mut Self {
+func (builder *TxBuilder) ChangeOutputDatum(data WData) *TxBuilder {
+	rawData, err := data.ToCbor()
+	if err != nil {
+		panic("Error converting datum to CBOR")
+	}
+	builder.TxBuilderBody.ChangeDatum = types.InlineDatum{
+		Inner: rawData,
+	}
+	return builder
+}
 
 func (builder *TxBuilder) InvalidBefore(slot uint64) *TxBuilder {
 	builder.TxBuilderBody.ValidityRange.InvalidBefore = &slot
@@ -110,7 +121,48 @@ func (builder *TxBuilder) ChainTx(txHex string) *TxBuilder {
 	return builder
 }
 
-// pub fn input_for_evaluation(&mut self, input: &UTxO) -> &mut Self {
+func (builder *TxBuilder) InputForEvaluation(input types.UTxO) *TxBuilder {
+	utxoID := fmt.Sprintf("%s%d", input.Input.TxHash, input.Input.OutputIndex)
+	currentUtxo, ok := builder.InputsForEvaluation[utxoID]
+	if ok {
+		dataHash := input.Output.DataHash
+		if dataHash == nil {
+			dataHash = currentUtxo.Output.DataHash
+		}
+
+		plutusData := input.Output.PlutusData
+		if plutusData == nil {
+			plutusData = currentUtxo.Output.PlutusData
+		}
+
+		scriptRef := input.Output.ScriptRef
+		if scriptRef == nil {
+			scriptRef = currentUtxo.Output.ScriptRef
+		}
+
+		scriptHash := input.Output.ScriptHash
+		if scriptHash == nil {
+			scriptHash = currentUtxo.Output.ScriptHash
+		}
+
+		updatedUtxo := types.UTxO{
+			Output: types.UtxoOutput{
+				Address:    input.Output.Address,
+				Amount:     input.Output.Amount,
+				DataHash:   dataHash,
+				PlutusData: plutusData,
+				ScriptRef:  scriptRef,
+				ScriptHash: scriptHash,
+			},
+			Input: input.Input,
+		}
+		builder.InputsForEvaluation[utxoID] = updatedUtxo
+	} else {
+		builder.InputsForEvaluation[utxoID] = input
+	}
+
+	return builder
+}
 
 func (builder *TxBuilder) SelectUtxosFrom(extraInputs []types.UTxO, threshold uint64) *TxBuilder {
 	builder.SelectionThreshold = threshold
@@ -128,14 +180,114 @@ func (builder *TxBuilder) Network(network types.Network) *TxBuilder {
 	return builder
 }
 
-// pub fn queue_input(&mut self) {
+func (builder *TxBuilder) QueueInput() *TxBuilder {
+	switch txInItem := builder.TxInItem.(type) {
+	case types.ScriptTxIn:
+		if txInItem.ScriptTxIn.DatumSource == nil {
+			panic("Datum in a script input cannot be None")
+		}
+		if txInItem.ScriptTxIn.Redeemer == nil {
+			panic("Redeemer in script input cannot be None")
+		}
+		if txInItem.ScriptTxIn.ScriptSource == nil {
+			panic("Script source in script input cannot be None")
+		}
+	case types.SimpleScriptTxIn:
+	case types.PubKeyTxIn:
+	}
+
+	input := builder.TxInItem
+	builder.InputForEvaluation(input.ToUTxO())
+	builder.TxBuilderBody.Inputs = append(builder.TxBuilderBody.Inputs, input)
+	builder.TxInItem = nil
+	return builder
+}
+
+func (builder *TxBuilder) QueueWithdrawal() *TxBuilder {
+	switch withdrawalItem := builder.WithdrawalItem.(type) {
+	case types.PlutusScriptWithdrawal:
+		if withdrawalItem.Redeemer == nil {
+			panic("Redeemer in script withdrawal cannot be None")
+		}
+		if withdrawalItem.ScriptSource == nil {
+			panic("Script source in script withdrawal cannot be None")
+		}
+	case types.SimpleScriptWithdrawal:
+		if withdrawalItem.ScriptSource == nil {
+			panic("Script source missing from native script withdrawal")
+		}
+	case types.PubKeyWithdrawal:
+	}
+	builder.TxBuilderBody.Withdrawals = append(builder.TxBuilderBody.Withdrawals, builder.WithdrawalItem)
+	builder.WithdrawalItem = nil
+	return builder
+}
+
+func (builder *TxBuilder) QueueVote() *TxBuilder {
+	switch voteItem := builder.VoteItem.(type) {
+	case types.ScriptVote:
+		if voteItem.Redeemer == nil {
+			panic("Redeemer in script vote cannot be None")
+		}
+		if voteItem.ScriptSource == nil {
+			panic("Script source in script vote cannot be None")
+		}
+	case types.SimpleScriptVote:
+		if voteItem.SimpleScriptSource == nil {
+			panic("Script source is missing from native script vote")
+		}
+	case types.BasicVote:
+	}
+	builder.TxBuilderBody.Votes = append(builder.TxBuilderBody.Votes, builder.VoteItem)
+	builder.VoteItem = nil
+	return builder
+}
+
+func (builder *TxBuilder) QueueMint() *TxBuilder {
+	switch mintItem := builder.MintItem.(type) {
+	case types.ScriptMint:
+		if mintItem.ScriptSource == nil {
+			panic("Missing mint script information")
+		}
+		builder.TxBuilderBody.Mints = append(builder.TxBuilderBody.Mints, mintItem)
+	case types.SimpleScriptMint:
+		if mintItem.ScriptSource == nil {
+			panic("Missing mint script information")
+		}
+		builder.TxBuilderBody.Mints = append(builder.TxBuilderBody.Mints, mintItem)
+	}
+	builder.MintItem = nil
+	return builder
+}
+
+func (builder *TxBuilder) QueueAllLastItem() *TxBuilder {
+	if builder.TxOutput != nil {
+		builder.TxBuilderBody.Outputs = append(builder.TxBuilderBody.Outputs, *builder.TxOutput)
+		builder.TxOutput = nil
+	}
+	if builder.TxInItem != nil {
+		builder.QueueInput()
+	}
+	if builder.CollateralItem != nil {
+		builder.TxBuilderBody.Collaterals = append(
+			builder.TxBuilderBody.Collaterals,
+			*builder.CollateralItem,
+		)
+		builder.CollateralItem = nil
+	}
+	if builder.WithdrawalItem != nil {
+		builder.QueueWithdrawal()
+	}
+	if builder.VoteItem != nil {
+		builder.QueueVote()
+	}
+	if builder.MintItem != nil {
+		builder.QueueMint()
+	}
+	return builder
+}
+
+// func (builder *TxBuilder) AddUTxOsFrom(extraInputs []types.UTxO, threshold uint64) *TxBuilder {
 //
-// pub fn queue_withdrawal(&mut self) {
-//
-// pub fn queue_vote(&mut self) {
-//
-// pub fn queue_mint(&mut self) {
-//
-// pub fn queue_all_last_item(&mut self) {
-//
-// pub fn add_utxos_from(
+// 	return builder
+// }

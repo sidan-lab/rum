@@ -42,7 +42,7 @@ func (builder *TxBuilder) TxIn(
 	address string,
 ) *TxBuilder {
 	if builder.TxInItem != nil {
-		// TODO: queue input
+		builder.QueueInput()
 	}
 
 	if builder.AddingScriptInput != nil {

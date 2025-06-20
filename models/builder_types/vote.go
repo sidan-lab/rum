@@ -16,14 +16,18 @@ type ScriptVote struct {
 	ScriptSource ScriptSource `json:"scriptSource"`
 }
 
+func (ScriptVote) isVote() {}
+
 type SimpleScriptVote struct {
 	Vote               VoteType           `json:"vote"`
 	SimpleScriptSource SimpleScriptSource `json:"simpleScriptSource"`
 }
 
+func (SimpleScriptVote) isVote() {}
+
 type VoteType struct {
 	Voter           Voter           `json:"voter"`
-	GovActionId     RefTxIn         `json:"govActionId"`
+	GovActionID     RefTxIn         `json:"govActionId"`
 	VotingProcedure VotingProcedure `json:"votingProcedure"`
 }
 
@@ -37,12 +41,12 @@ type ConstitutionalCommitteeHotCred struct {
 
 func (ConstitutionalCommitteeHotCred) isVoter() {}
 
-type DRepId struct {
+type DRepID struct {
 	Inner string `json:"dRepId"`
 }
 
-func (DRepId) isVoter() {}
-func (DRepId) isDRep() {}
+func (DRepID) isVoter() {}
+func (DRepID) isDRep() {}
 
 type StakingPoolKeyHash struct {
 	Inner string `json:"stakingPoolKeyHash"`
