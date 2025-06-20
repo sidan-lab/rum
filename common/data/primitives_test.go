@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/sidan-lab/rum/models/data"
+	"github.com/sidan-lab/rum/common/data"
 )
 
 func TestInteger(t *testing.T) {

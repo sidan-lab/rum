@@ -3,17 +3,17 @@ package builder
 import (
 	"encoding/json"
 
+	"github.com/sidan-lab/rum/common/data"
 	types "github.com/sidan-lab/rum/models/builder_types"
-	"github.com/sidan-lab/rum/models/data"
 )
 
 type WData interface {
-	ToCbor() string
+	ToCbor() (string, error)
 }
 
-type Cbor string
+type WCbor string
 
-func (c Cbor) ToCbor() (string, error) {
+func (c WCbor) ToCbor() (string, error) {
 	return string(c), nil
 }
 

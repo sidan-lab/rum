@@ -10,13 +10,17 @@ type ScriptMint struct {
 	ScriptSource ScriptSource  `json:"scriptSource"`
 }
 
+func (ScriptMint) isMintItem() {}
+
 type SimpleScriptMint struct {
 	Mint         MintParameter      `json:"mint"`
 	ScriptSource SimpleScriptSource `json:"scriptSource"`
 }
 
+func (SimpleScriptMint) isMintItem() {}
+
 type MintParameter struct {
-	PolicyId  string `json:"policyId"`
+	PolicyID  string `json:"policyId"`
 	AssetName string `json:"assetName"`
 	Amount    int64  `json:"amount"`
 }

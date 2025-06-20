@@ -10,10 +10,10 @@ type TxBuilder struct {
 	// serializer: WhiskyCSL,
 	TxBuilderBody          *types.TxBuilderBody
 	ProtocolParams         *models.Protocol
-	TxInItem               *types.TxIn
+	TxInItem               types.TxIn
 	WithdrawalItem         *types.Withdrawal
-	VoteItem               *types.Vote
-	MintItem               *types.MintItem
+	VoteItem               types.Vote
+	MintItem               types.MintItem
 	CollateralItem         *types.PubKeyTxIn
 	TxOutput               *types.Output
 	AddingScriptInput      *types.LanguageVersion
