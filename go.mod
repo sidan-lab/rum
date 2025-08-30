@@ -15,4 +15,4 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.5 // indirect
 )
 
-replace github.com/sidan-lab/cardano-golang-signing-module => /Users/whatever/Desktop/WorkDev/sidan/cardano-golang-signing-module
+// replace github.com/sidan-lab/cardano-golang-signing-module => /Users/whatever/Desktop/WorkDev/sidan/cardano-golang-signing-module
