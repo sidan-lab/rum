@@ -62,7 +62,7 @@ func NewMnemonicWallet(mnemonic string, derivationPath DerivationIndices) (*Wall
 func (w *Wallet) PaymentAccount(accountIndex, keyIndex uint32) *Wallet {
 	derivationPath := PaymentDerivation(accountIndex, keyIndex)
 	newWallet := *w
-	
+
 	switch w.WalletType {
 	case WalletTypeMnemonic:
 		if signer, err := signer.NewMnemonicSigner(w.Account.PrivateKey, derivationPath.ToString()); err == nil {
@@ -73,14 +73,14 @@ func (w *Wallet) PaymentAccount(accountIndex, keyIndex uint32) *Wallet {
 			newWallet.signer = signer
 		}
 	}
-	
+
 	return &newWallet
 }
 
 func (w *Wallet) StakeAccount(accountIndex, keyIndex uint32) *Wallet {
 	derivationPath := StakeDerivation(accountIndex, keyIndex)
 	newWallet := *w
-	
+
 	switch w.WalletType {
 	case WalletTypeMnemonic:
 		if signer, err := signer.NewMnemonicSigner(w.Account.PrivateKey, derivationPath.ToString()); err == nil {
@@ -91,14 +91,14 @@ func (w *Wallet) StakeAccount(accountIndex, keyIndex uint32) *Wallet {
 			newWallet.signer = signer
 		}
 	}
-	
+
 	return &newWallet
 }
 
 func (w *Wallet) DRepAccount(accountIndex, keyIndex uint32) *Wallet {
 	derivationPath := DRepDerivation(accountIndex, keyIndex)
 	newWallet := *w
-	
+
 	switch w.WalletType {
 	case WalletTypeMnemonic:
 		if signer, err := signer.NewMnemonicSigner(w.Account.PrivateKey, derivationPath.ToString()); err == nil {
@@ -109,7 +109,7 @@ func (w *Wallet) DRepAccount(accountIndex, keyIndex uint32) *Wallet {
 			newWallet.signer = signer
 		}
 	}
-	
+
 	return &newWallet
 }
 
