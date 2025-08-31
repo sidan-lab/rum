@@ -12,8 +12,8 @@ github.com/lpernett/godotenv v0.0.0-20230527005122-0de1d4c5ef5e/go.mod h1:K+inF/
 github.com/maestro-org/go-sdk v1.2.0 h1:0YbC5bwRWklV25L1Z4p2pg2VQYasZGDaC9Epfxwd3a0=
 github.com/maestro-org/go-sdk v1.2.0/go.mod h1:EYaRwFT8nkwFzZsN6xK256j+r7ASUUn9p44RlaqYjE8=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
-github.com/sidan-lab/cardano-golang-signing-module v0.0.0-20250714081633-48b4e2bd2de1 h1:OrZr6v883A6jFw3jLmXz39jKoTGE1fxQ56udLXQH2fI=
-github.com/sidan-lab/cardano-golang-signing-module v0.0.0-20250714081633-48b4e2bd2de1/go.mod h1:hkyslGug0koUoH+SrqpiMTQUQOfaXnh04fGTV+bukXM=
+github.com/sidan-lab/cardano-golang-signing-module v0.0.2 h1:yQ2WN5FswBGcXCG581KYag880rmWmStgPCS+XfjFM+k=
+github.com/sidan-lab/cardano-golang-signing-module v0.0.2/go.mod h1:hkyslGug0koUoH+SrqpiMTQUQOfaXnh04fGTV+bukXM=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 golang.org/x/crypto v0.37.0 h1:kJNSjF/Xp7kU0iB2Z+9viTPMW4EqqsrywMXLJOOsXSE=
 golang.org/x/crypto v0.37.0/go.mod h1:vg+k43peMZ0pUMhYmVAWysMK35e6ioLh3wB8ZCAfbVc=
