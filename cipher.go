@@ -7,7 +7,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"io"
 
 	"golang.org/x/crypto/pbkdf2"
@@ -63,47 +63,66 @@ func EncryptWithCipher(data, key string, initializationVectorSize int) (string, 
 	return string(encryptedJSON), nil
 }
 
-// DecryptWithCipherPBKDF2 decrypts data using PBKDF2 key derivation
-func DecryptWithCipher(encryptedDataJSON, key string) (string, error) {
-	// Parse the JSON
-	var cipherData CipherData
-	if err := json.Unmarshal([]byte(encryptedDataJSON), &cipherData); err != nil {
-		return "", err
+func DecryptWithCipher(encryptedDataJSON string, password string) (string, error) {
+	// Parse the encrypted data JSON
+	var encData struct {
+		IV         string  `json:"iv"`
+		Salt       *string `json:"salt,omitempty"`
+		Ciphertext string  `json:"ciphertext"`
 	}
 
-	// Decode base64
-	iv, err := base64.StdEncoding.DecodeString(cipherData.IV)
+	err := json.Unmarshal([]byte(encryptedDataJSON), &encData)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to parse encrypted data: %w", err)
 	}
-	ciphertext, err := base64.StdEncoding.DecodeString(cipherData.Ciphertext)
+
+	// Decode IV from base64
+	iv, err := base64.StdEncoding.DecodeString(encData.IV)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to decode IV: %w", err)
 	}
 
-	// Create a salt with the same length as the IV (all zeros)
-	salt := make([]byte, len(iv))
+	// Decode ciphertext from base64
+	ciphertext, err := base64.StdEncoding.DecodeString(encData.Ciphertext)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode ciphertext: %w", err)
+	}
 
-	// Derive key using PBKDF2 with SHA-256
-	derivedKey := pbkdf2.Key([]byte(key), salt, 100000, 32, sha256.New)
+	// Handle salt - support both new format (with salt) and legacy format (without salt)
+	var salt []byte
+	if encData.Salt != nil && *encData.Salt != "" {
+		// New format: use the provided salt
+		salt, err = base64.StdEncoding.DecodeString(*encData.Salt)
+		if err != nil {
+			return "", fmt.Errorf("failed to decode salt: %w", err)
+		}
+	} else {
+		// Legacy format: use zero-filled salt of IV length for backward compatibility
+		salt = make([]byte, len(iv))
+	}
 
-	// Create cipher block
+	// Derive cryptographic key from password using PBKDF2
+	// Matches frontend: 100,000 iterations, SHA-256, 256-bit key
+	derivedKey := pbkdf2.Key([]byte(password), salt, 100000, 32, sha256.New)
+
+	// Create AES cipher
 	block, err := aes.NewCipher(derivedKey)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to create cipher: %w", err)
 	}
 
-	// Use GCM mode (default in the JS implementation)
-	aesGCM, err := cipher.NewGCM(block)
+	// Create GCM mode
+	aesgcm, err := cipher.NewGCM(block)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to create GCM: %w", err)
 	}
 
 	// Decrypt the data
-	plaintext, err := aesGCM.Open(nil, iv, ciphertext, nil)
+	plaintext, err := aesgcm.Open(nil, iv, ciphertext, nil)
 	if err != nil {
-		return "", errors.New("decryption failed: " + err.Error())
+		return "", fmt.Errorf("failed to decrypt (incorrect password or corrupted data): %w", err)
 	}
 
+	// Return the decrypted data as string
 	return string(plaintext), nil
 }
