@@ -149,3 +149,72 @@ func BfToAsset(bfAsset blockfrost.TxAmount) Asset {
 		Unit:     bfAsset.Unit,
 	}
 }
+
+func (bf *BlockfrostProvider) FetchAddressUTxOs(address string, asset *string) ([]UTxO, error) {
+	var utxos []UTxO
+
+	if asset != nil && *asset != "" {
+		resChan := bf.blockfrostClient.AddressUTXOsAssetAll(context.TODO(), address, *asset)
+		for res := range resChan {
+			if res.Err != nil {
+				return nil, res.Err
+			}
+			for _, bfUtxo := range res.Res {
+				utxos = append(utxos, BfAddressUtxoToUtxo(bfUtxo))
+			}
+		}
+	} else {
+		resChan := bf.blockfrostClient.AddressUTXOsAll(context.TODO(), address)
+		for res := range resChan {
+			if res.Err != nil {
+				return nil, res.Err
+			}
+			for _, bfUtxo := range res.Res {
+				utxos = append(utxos, BfAddressUtxoToUtxo(bfUtxo))
+			}
+		}
+	}
+
+	return utxos, nil
+}
+
+func BfAddressUtxoToUtxo(bfUtxo blockfrost.AddressUTXO) UTxO {
+	dataHash := ""
+	if bfUtxo.DataHash != nil {
+		dataHash = *bfUtxo.DataHash
+	}
+	inlineDatum := ""
+	if bfUtxo.InlineDatum != nil {
+		inlineDatum = *bfUtxo.InlineDatum
+	}
+	referenceScriptHash := ""
+	if bfUtxo.ReferenceScriptHash != nil {
+		referenceScriptHash = *bfUtxo.ReferenceScriptHash
+	}
+
+	return UTxO{
+		Input: Input{
+			TxHash:      bfUtxo.TxHash,
+			OutputIndex: bfUtxo.OutputIndex,
+		},
+		Output: Output{
+			Amount:     BfAddressAmountsToAssets(bfUtxo.Amount),
+			Address:    bfUtxo.Address,
+			DataHash:   dataHash,
+			PlutusData: inlineDatum,
+			ScriptRef:  "",
+			ScriptHash: referenceScriptHash,
+		},
+	}
+}
+
+func BfAddressAmountsToAssets(bfAmounts []blockfrost.AddressAmount) []Asset {
+	assets := make([]Asset, len(bfAmounts))
+	for i, bfAmount := range bfAmounts {
+		assets[i] = Asset{
+			Quantity: bfAmount.Quantity,
+			Unit:     bfAmount.Unit,
+		}
+	}
+	return assets
+}
