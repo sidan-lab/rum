@@ -7,7 +7,7 @@ type IProvider interface {
 
 type IFetcher interface {
 	// FetchAccountInfo(address string) (AccountInfo, error)
-	// FetchAddressUTxOs(address string, asset *string) ([]UTxO, error)
+	FetchAddressUTxOs(address string, asset *string) ([]UTxO, error)
 	// FetchAssetAddresses(asset string) ([]struct {
 	// 	Address  string
 	// 	Quantity string

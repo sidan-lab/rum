@@ -2,6 +2,7 @@ package rum
 
 import (
 	"encoding/json"
+	"errors"
 	"strconv"
 
 	"github.com/maestro-org/go-sdk/client"
@@ -42,6 +43,11 @@ func (ms *MaestroProvider) FetchTxInfo(hash string) (TransactionInfo, error) {
 		InvalidAfter:  formatOptionalInt(msTxInfo.InvalidHereafter),
 	}
 	return txInfo, nil
+}
+
+// TODO: implement FetchAddressUTxOs
+func (ms *MaestroProvider) FetchAddressUTxOs(address string, asset *string) ([]UTxO, error) {
+	return nil, errors.New("FetchAddressUTxOs not implemented for MaestroProvider")
 }
 
 type MsDatum struct {
