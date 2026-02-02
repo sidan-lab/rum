@@ -5,6 +5,7 @@ type IProvider interface {
 	ISubmitter
 }
 
+// TODO: interface add context params and respect context instead of using context.TODO()
 type IFetcher interface {
 	// FetchAccountInfo(address string) (AccountInfo, error)
 	FetchAddressUTxOs(address string, asset *string) ([]UTxO, error)
